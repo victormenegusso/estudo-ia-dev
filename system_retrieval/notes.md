@@ -165,3 +165,114 @@ no arquivo tokenization-02.py
 ## Boolean Retrieval
 
 no arquivo tokenization-03.py
+
+## Probabilistic Retrieval
+
+no arquivo tokenization-04.py
+
+## Comparação: Vector Space Model vs Probabilistic Retrieval
+
+### Analogia do Mundo Real
+
+Imagine você perguntando "Quem conhece sobre smartphones" em uma multidão:
+
+**Vector Space Model (TF-IDF)**
+- Procura pessoas que **falam sobre as mesmas coisas que você perguntou**
+- Conta quantas vezes cada pessoa menciona as palavras "smartphone", "camera", etc.
+- Quanto mais palavras em comum, mais relevante
+
+**Probabilistic Retrieval (BM25)**
+- Procura pessoas que **provavelmente conhecem a resposta**
+- Considera: Essa pessoa fala sobre smartphone? Quanto ela fala? Essa palavra é comum ou rara?
+- Aprende que falar 100x a mesma coisa não torna a pessoa 100x mais especialista
+
+### Explicação Técnica
+
+#### Vector Space Model (TF-IDF + Cosine Similarity)
+```
+Ideia: "Coloca cada documento em um espaço multidimensional como um ponto"
+
+Doc1: "smartphone camera phone"
+↓ Converte para vetor baseado em frequência de termos
+Vetor: [freq_smartphone, freq_camera, freq_phone, ...]
+
+Query: "smartphone"
+↓ Converte para vetor
+Vetor: [1, 0, 0, ...]
+
+↓ Calcula ângulo entre os vetores
+Quanto menor o ângulo = mais similares
+```
+
+**Resultado:** Score de similaridade entre 0 e 1
+
+#### Probabilistic Retrieval (BM25)
+```
+Ideia: "Qual é a probabilidade de este documento responder à minha pergunta?"
+
+Query: "smartphone"
+Para cada documento:
+  1. O documento fala sobre smartphone? SIM/NÃO
+  2. Quantas vezes menciona? (mas com limite - saturação)
+  3. Qual o tamanho do documento? (normalização)
+  4. "smartphone" é rara no corpus? (peso maior se rara)
+  
+Score = P(documento relevante | query)
+```
+
+**Resultado:** Score contínuo (sem limite superior fixo)
+
+### Diferenças Principais
+
+| Aspecto | Vector Space | Probabilistic |
+|---------|--------------|---------------|
+| **Pergunta que faz** | Que documentos têm palavras similares? | Qual documento provavelmente responde? |
+| **Como funciona** | Geométrico (ângulo entre vetores) | Estatístico (probabilidade) |
+| **Repetição de termos** | Score aumenta infinitamente | Saturação (para de aumentar) |
+| **Normalização** | Não considera tamanho | Normaliza por tamanho do doc |
+| **Score** | 0-1 | Contínuo, sem limite |
+| **Interpretação** | Similaridade | Relevância estimada |
+
+### Exemplo Prático
+
+Query: "machine learning machine learning machine" (3x repetida)
+
+**Vector Space (TF-IDF):**
+```
+Doc1: "machine learning é importante"
+↓
+TF(machine learning) = 2/5 = 0.4
+IDF(machine learning) = log(100/50) = 0.3
+TF-IDF = 0.4 × 0.3 = 0.12
+
+Repetir "machine learning" 3x na query: 
+Score TF fica ainda maior = sobrepesa a repetição
+```
+
+**Probabilistic (BM25):**
+```
+Doc1: "machine learning é importante"
+↓
+BM25 pensa: "Já vimos machine learning, incrementa score"
+Query tem machine learning 2x: "OK, relevante"
+Query tem machine learning 3x: "A 3ª repetição não adiciona muito"
+Score = saturado, não vai ficar 3x maior só por repetição
+```
+
+### Quando Usar Cada Um
+
+**Vector Space Model:**
+- Corpus pequeno a médio
+- Quando você quer resultados normalizados (0-1)
+- Quando precisa de uma métrica geométrica clara
+- Embeddings semânticos (BERT, GPT) geralmente usam cosine similarity
+
+**Probabilistic Retrieval (BM25):**
+- Corpus grande e heterogêneo
+- Quando há documentos de tamanhos muito variados
+- Quando você quer naturalmente penalizar repetição excessiva
+- Busca de texto tradicional (Google dos anos 2000)
+
+Exemplo código: 
+- [tokenization-02.py](tokenization-02.py) (TF-IDF + Vector Space)
+- [tokenization-04.py](tokenization-04.py) (BM25 + Probabilistic)

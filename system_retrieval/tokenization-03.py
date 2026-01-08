@@ -9,6 +9,8 @@ import warnings
 
 warnings.filterwarnings("ignore", category=SyntaxWarning)
 
+#nltk.download('stopwords')
+
 documents = [
     "Machine learning é um campo da inteligência artificial que permite que computadores aprendam padrões a partir de dados.",
     "O aprendizado de máquina dá aos sistemas a capacidade de melhorar seu desempenho sem serem explicitamente programados.",
@@ -23,13 +25,21 @@ documents = [
     "Mais do que encontrar padrões, o machine learning ajuda a tomar decisões baseadas em evidências.",
 ]
 
+print("\n--- Documentos ---\n")
+print(documents)
 
 def preprocess(text):
+    print("\n--- Pré-processamento ---\n")
+    print("Texto original:", text)
     text_lower = text.lower()
     tokens = nltk.word_tokenize(text_lower)
+    print("Tokens antes da remoção de stop words:", tokens)
     tokens = [word for word in tokens if word.isalnum()]
+    print("Tokens após remoção de pontuação:", tokens)
     stopwords = set(nltk.corpus.stopwords.words("portuguese")) - {"e", "ou", "não"}
+    print("Stop words removidas:", stopwords)
     tokens = [word for word in tokens if word not in stopwords]
+    print("Tokens após remoção de stop words:", tokens)
     return tokens
 
 
@@ -46,6 +56,8 @@ index = create_in("index_dir", schema)
 
 writer = index.writer()
 for i, doc in enumerate(documents):
+    print(f"\n--- Adicionando documento {i} ---\n")
+    print(doc)  
     writer.add_document(title=str(i), content=doc)
 writer.commit()
 
@@ -53,11 +65,17 @@ query = "machine E learning"
 
 
 def boolean_search(query, index):
+    print(f"\n--- Consulta booleana: {query} ---\n")
     parser = QueryParser("content", schema=index.schema)
     parsed_query = parser.parse(query)
+    print("Consulta parseada:", parsed_query)
 
     with index.searcher() as searcher:
+        print("\n--- Resultados da busca ---\n")        
         results = searcher.search(parsed_query)
+        print(f"Número de resultados encontrados: {len(results)}")
+        for hit in results:
+            print(f"Documento ID: {hit['title']}, Conteúdo: {hit['content']}")
         return [(hit["title"], hit["content"]) for hit in results]
 
 
