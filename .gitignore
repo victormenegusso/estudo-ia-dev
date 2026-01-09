@@ -1,8 +1,10 @@
 material/dev_mais_eficientematerial/dev_mais_eficiente/
 material/dev_mais_eficiente/
-index_dir/
+fundamentos_rag/example/.env
+fundamentos_rag/example/.venv
 fundamentos_gen_ai/groq-exemplo/.env
 fundamentos_gen_ai/groq-exemplo/.venv
 fundamentos_gen_ai/openai-exemplo/.env
 fundamentos_gen_ai/openai-exemplo/.venv
 .DS_Store
+index_dir/

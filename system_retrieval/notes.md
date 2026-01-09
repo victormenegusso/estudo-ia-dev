@@ -276,3 +276,67 @@ Score = saturado, não vai ficar 3x maior só por repetição
 Exemplo código: 
 - [tokenization-02.py](tokenization-02.py) (TF-IDF + Vector Space)
 - [tokenization-04.py](tokenization-04.py) (BM25 + Probabilistic)
+
+
+
+### Observação: Evolução das Técnicas de Representação
+
+Até agora, trabalhamos com **3 abordagens baseadas em frequência de termos**:
+
+1. **TF-IDF (Vector Space Model)** - tokenization-02.py
+   - Conta frequência de palavras
+   - "smartphone" e "celular" são completamente diferentes
+   - Rápido, mas sem compreensão de significado
+
+2. **Boolean Retrieval** - tokenization-03.py
+   - Busca exata com operadores lógicos
+   - Não captura relevância ou sinonímia
+
+3. **Probabilistic Retrieval (BM25)** - tokenization-04.py
+   - Melhora a probabilidade de relevância considerando estatísticas
+   - Ainda baseado em palavras, não em significado semântico
+
+### O Próximo Passo: Embeddings Semânticos
+
+**Embeddings** são representações vetoriais **densas** geradas por modelos de linguagem treinados:
+- Cada palavra/frase vira um vetor com centenas de dimensões (ex: 384 números)
+- Estes números **entendem significado**
+- "smartphone" ≈ "celular" (vetores muito próximos)
+- "smartphone" ≠ "livro" (vetores distantes)
+
+#### Comparação Prática
+
+```
+TF-IDF:
+"smartphone com boa camera" → [0, 1, 0, 1, 0, ...] (índices e frequências)
+"celular com boa câmera" → [0, 0, 1, 0, 1, ...] (completamente diferente!)
+
+Embeddings:
+"smartphone com boa camera" → [0.2, -0.5, 0.8, ..., 0.1] (384 dimensões)
+"celular com boa câmera" → [0.21, -0.48, 0.79, ..., 0.11] (muito similar!)
+
+```
+
+
+#### Diferenças-Chave
+
+| Aspecto | Frequência (até agora) | Embeddings (próximo) |
+|--------|----------------------|----------------------|
+| **Representação** | Vetor esparso (poucos 1s) | Vetor denso (todos números) |
+| **Tamanho** | N termos únicos | 384-768 dimensões (fixo) |
+| **Significado** | Sem compreensão | Compreende semântica |
+| **Sinonímia** | "smartphone" ≠ "celular" | "smartphone" ≈ "celular" |
+| **Computação** | Rápida | Mais lenta (precisa modelo) |
+| **Ferramenta** | sklearn, numpy | sentence-transformers |
+
+#### Quando Usar Embeddings
+
+- Quando você precisa entender **significado**, não apenas palavras
+- Quando há **sinonímia** e **conceitos relacionados**
+- Quando você quer busca **semântica** (buscar por ideia, não por palavra exata)
+- Exemplo: "melhores telefones para fotografia" encontra "smartphones com câmera profissional"
+
+#### Ferramentas Disponíveis (já no pyproject.toml)
+
+- `sentence-transformers>=5.1.1` - Gera embeddings semânticos
+- `qdrant-client[fastembed]>=1.15.1` - Banco de dados vetorial para embeddings
