@@ -2,6 +2,9 @@ material/dev_mais_eficientematerial/dev_mais_eficiente/
 material/dev_mais_eficiente/
 fundamentos_rag/example/.env
 fundamentos_rag/example/.venv
+fundamentos_rag/example-vector-db/.env
+fundamentos_rag/example-vector-db/.venv
+fundamentos_rag/example-vector-db/db
 fundamentos_gen_ai/groq-exemplo/.env
 fundamentos_gen_ai/groq-exemplo/.venv
 fundamentos_gen_ai/openai-exemplo/.env

@@ -1,6 +1,7 @@
-import numpy as np # serve para operações matemáticas
-from sentence_transformers import SentenceTransformer # serve para criar embeddings de sentenças
 from groq import Groq
+from qdrant_client import QdrantClient
+from qdrant_client.http.models import Distance, PointStruct, VectorParams
+from sentence_transformers import SentenceTransformer
 
 documents = [
     "Machine learning é um campo da inteligência artificial que permite que computadores aprendam padrões a partir de dados.",
@@ -16,44 +17,45 @@ documents = [
     "Mais do que encontrar padrões, o machine learning ajuda a tomar decisões baseadas em evidências.",
 ]
 
-print("Carregando modelo de embeddings...")
-model = SentenceTransformer("all-MiniLM-L6-v2") # modelo leve e eficiente para criar embeddings de sentenças, mas e mais eficiente em inglês, 
-                                                # esses modelos sao treinados com pares que vao indicar similaridade semantica entre frases
-                                                # exemplo: "O gato está no tapete" e "O felino está sobre o tapete" terao embeddings proximos
-
-print("Inicializando cliente Groq...")                                               
 client = Groq()
+print("Carregando modelo de embeddings e inicializando banco de dados vetorial...")
+model = SentenceTransformer("all-MiniLM-L6-v2")
+o=print("Criando coleção e inserindo documentos no banco de dados vetorial...")
+# qdrant = QdrantClient(":memory:")
+qdrant = QdrantClient(path="db/data")
 
-print("Criando embeddings para os documentos...")
-doc_embeddings = model.encode(documents) # cria embeddings para todos os documentos
-doc_embeddings
+vector_size = model.get_sentence_embedding_dimension() # tamanho dos vetores de embedding
 
+qdrant.create_collection(
+    collection_name="ml_documents",
+    vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE), 
+)
+print("Documentos inseridos no banco de dados vetorial.")
+points = []
+for idx, doc in enumerate(documents):
+    embedding = model.encode(doc).tolist()
+    points.append(PointStruct(id=idx, vector=embedding, payload={"text": doc}))
 
-def cosine_similarity(a, b):
-    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+print("Inserindo pontos na coleção...")
+qdrant.upsert(collection_name="ml_documents", points=points, wait=True)
 
+print("Pontos inseridos com sucesso.")
 
-def retrieve(query, top_k=3): # top_k = quantos documentos mais relevantes queremos recuperar
-    print("Recuperando documentos relevantes para a consulta:", query)
-    query_embedding = model.encode([query])[0]
+def retrieve(query, top_k=3):
+    query_embedding = model.encode(query).tolist()
+    search_result = qdrant.query_points(
+        collection_name="ml_documents",
+        query=query_embedding,
+        limit=top_k,
+        with_payload=True,
+    )
 
-    similarities = []
-    for i, doc_emb in enumerate(doc_embeddings):
-        sim = cosine_similarity(query_embedding, doc_emb)
-        similarities.append((i, sim))
-
-    similarities.sort(key=lambda x: x[1], reverse=True)
-
-    return [(documents[i], sim) for i, sim in similarities[:top_k]]
+    return [(hit.payload["text"], hit.score) for hit in search_result.points]
 
 
 def generate_answer(query, retrieve_docs):
-    print("Gerando resposta para a consulta com base nos documentos recuperados.")
     context = "\n".join([doc for doc, _ in retrieve_docs])
-    
-    print("Contexto fornecido ao modelo:")
-    print(context)
-    
+
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
         messages=[
@@ -70,18 +72,14 @@ def generate_answer(query, retrieve_docs):
 
 
 def rag(query, top_k=3):
-    print("Iniciando processo RAG para a consulta:", query)
     retrieved = retrieve(query, top_k)
     answer = generate_answer(query, retrieved)
     return answer, retrieved
 
 
 answer, docs = rag("O que é machine learning?")
-print("Resposta:")
 print(answer)
-print("\nDocumentos Recuperados:")
 print(docs)
 
 for doc, similarity in docs:
     print(f" - {similarity:.3f}: {doc}")
-
