@@ -5,6 +5,11 @@ fundamentos_rag/example/.venv
 fundamentos_rag/example-vector-db/.env
 fundamentos_rag/example-vector-db/.venv
 fundamentos_rag/example-vector-db/db
+fundamentos_rag/example-docling/.env
+fundamentos_rag/example-docling/.venv
+fundamentos_rag/example-docling/db
+fundamentos_rag/example-docling/images
+fundamentos_rag/example-docling/test_output
 fundamentos_gen_ai/groq-exemplo/.env
 fundamentos_gen_ai/groq-exemplo/.venv
 fundamentos_gen_ai/openai-exemplo/.env

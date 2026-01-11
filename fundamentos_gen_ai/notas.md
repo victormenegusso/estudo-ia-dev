@@ -19,6 +19,10 @@ Input IDs são mapeados para embeddings através de uma tabela de embeddings apr
 
 Embeddings são vetores densos que capturam o significado semântico dos tokens, o tamanho do vetor depende do modelo (e.g., 768 para BERT base).
 
+O tamanho do vetor de embedding é um hiperparâmetro do modelo e influencia sua capacidade de capturar nuances semânticas. Quantos mais dimensões, mais informações podem ser representadas, mas também aumenta a complexidade computacional.
+
+Cada posiçào do vetor de embedding pode capturar diferentes aspectos semânticos do token, como gênero, número, contexto, etc. Esses aspectos são aprendidos durante o treinamento do modelo.
+
 ### Positional Encodings
 
 Adiciona informações sobre a posição dos tokens na sequência, já que transformers não possuem uma noção intrínseca de ordem.
