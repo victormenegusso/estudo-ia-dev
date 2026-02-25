@@ -1,4 +1,5 @@
-import langextract as lx
+import langextract as lx # essa libraria facilita a extração estruturada de informações de textos usando modelos de linguagem avançados 
+                         # ela permite definir classes de extração e exemplos para guiar o modelo na extração de dados relevantes
 import textwrap
 from docling.document_converter import DocumentConverter
 
